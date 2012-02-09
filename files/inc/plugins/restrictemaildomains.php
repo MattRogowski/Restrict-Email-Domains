@@ -152,6 +152,20 @@ function restrictemaildomains_check()
 		{
 			$is_allowed_email_domain = true;
 		}
+		
+		if(!$is_allowed_email_domain)
+		{
+			foreach($allowed_email_domains as $domain)
+			{
+				if(substr($domain, 0, 1) == '.')
+				{
+					if(substr($mybb->input['email'], -strlen($domain)) == $domain)
+					{
+						$is_allowed_email_domain = true;
+					}
+				}
+			}
+		}
 	}
 	
 	if(!$is_allowed_email_domain)
