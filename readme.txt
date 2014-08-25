@@ -23,7 +23,7 @@ Change Log:
 23/10/10 - v0.1 -> v0.2 -> Fixed bug where it would check the email where it shouldn't do. Also shows a list of allowed domains in the error saying the given domain is invalid. To upgrade, reupload ./inc/plugins/restrictemaildomains.php and ./inc/languages/english/restrictemaildomains.lang.php
 08/11/10 - v0.2 -> v1.0 -> Tweaked how it checks the validity of the email address. To upgrade, reupload ./inc/plugins/restrictemaildomains.php
 18/11/10 - v1.0 -> v1.0.1 -> Email address was validated before the check for if it should even be validated. To upgrade, reupload ./inc/plugins/restrictemaildomains.php
-25/08/14 - v1.0.1 -> v1.1 -> MyBB 1.8 compatible. To upgrade, reupload ./inc/plugins/restrictemaildomains.php.
+25/08/14 - v1.0.1 -> v1.1 -> MyBB 1.8 compatible. To upgrade, reupload ./inc/plugins/restrictemaildomains.php
 
 Copyright 2014 Matthew Rogowski
 
