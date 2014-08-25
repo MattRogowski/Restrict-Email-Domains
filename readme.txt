@@ -1,10 +1,10 @@
 Name: Restrict Email Domains
 Description: Allows you to restrict which domains users can register with.
-Website: http://mattrogowski.co.uk
-Author: MattRogowski
+Website: https://github.com/MattRogowski/Restrict-Email-Domains
+Author: Matt Rogowski
 Authorsite: http://mattrogowski.co.uk
-Version: 1.0.1
-Compatibility: 1.6.x
+Version: 1.1
+Compatibility: 1.6.x, 1.8.x
 Files: 2
 Settings added: 3 (1 group)
 
@@ -23,8 +23,9 @@ Change Log:
 23/10/10 - v0.1 -> v0.2 -> Fixed bug where it would check the email where it shouldn't do. Also shows a list of allowed domains in the error saying the given domain is invalid. To upgrade, reupload ./inc/plugins/restrictemaildomains.php and ./inc/languages/english/restrictemaildomains.lang.php
 08/11/10 - v0.2 -> v1.0 -> Tweaked how it checks the validity of the email address. To upgrade, reupload ./inc/plugins/restrictemaildomains.php
 18/11/10 - v1.0 -> v1.0.1 -> Email address was validated before the check for if it should even be validated. To upgrade, reupload ./inc/plugins/restrictemaildomains.php
+25/08/14 - v1.0.1 -> v1.1 -> MyBB 1.8 compatible. To upgrade, reupload ./inc/plugins/restrictemaildomains.php.
 
-Copyright 2010 Matthew Rogowski
+Copyright 2014 Matthew Rogowski
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
