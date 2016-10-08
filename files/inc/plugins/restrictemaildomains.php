@@ -1,8 +1,8 @@
 <?php
 /**
- * Restrict Email Domains 1.1
+ * Restrict Email Domains 1.1.0
 
- * Copyright 2014 Matthew Rogowski
+ * Copyright 2016 Matthew Rogowski
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,10 +31,10 @@ function restrictemaildomains_info()
 		"description" => "Allows you to restrict which domains users can register with.",
 		"website" => "https://github.com/MattRogowski/Restrict-Email-Domains",
 		"author" => "Matt Rogowski",
-		"authorsite" => "http://mattrogowski.co.uk",
-		"version" => "1.1",
+		"authorsite" => "https://matt.rogow.ski",
+		"version" => "1.1.0",
 		"compatibility" => "16*,18*",
-		"guid" => "5c22b24a308921559e56c7392b82579a"
+		"codename" => "restrictemaildomains"
 	);
 }
 
