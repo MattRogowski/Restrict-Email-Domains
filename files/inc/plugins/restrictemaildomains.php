@@ -1,8 +1,8 @@
 <?php
 /**
- * Restrict Email Domains 1.1.0
+ * Restrict Email Domains 1.2.0
 
- * Copyright 2016 Matthew Rogowski
+ * Copyright 2017 Matthew Rogowski
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -22,7 +22,9 @@ if(!defined("IN_MYBB"))
 	die("Direct initialization of this file is not allowed.<br /><br />Please make sure IN_MYBB is defined.");
 }
 
-$plugins->add_hook("datahandler_user_validate", "restrictemaildomains_check");
+$plugins->add_hook("member_register_end", "restrictemaildomains_member_register_end");
+$plugins->add_hook("xmlhttp", "restrictemaildomains_xmlhttp");
+$plugins->add_hook("datahandler_user_validate", "restrictemaildomains_datahandler_user_validate");
 
 function restrictemaildomains_info()
 {
@@ -32,8 +34,8 @@ function restrictemaildomains_info()
 		"website" => "https://github.com/MattRogowski/Restrict-Email-Domains",
 		"author" => "Matt Rogowski",
 		"authorsite" => "https://matt.rogow.ski",
-		"version" => "1.1.0",
-		"compatibility" => "16*,18*",
+		"version" => "1.2.0",
+		"compatibility" => "18*",
 		"codename" => "restrictemaildomains"
 	);
 }
@@ -41,9 +43,9 @@ function restrictemaildomains_info()
 function restrictemaildomains_activate()
 {
 	global $db;
-	
+
 	restrictemaildomains_deactivate();
-	
+
 	$settings_group = array(
 		"name" => "restrictemaildomains",
 		"title" => "Restrict Email Domains Settings",
@@ -53,7 +55,7 @@ function restrictemaildomains_activate()
 	);
 	$db->insert_query("settinggroups", $settings_group);
 	$gid = $db->insert_id();
-	
+
 	$settings = array();
 	$settings[] = array(
 		"name" => "restrictemaildomains_enabled",
@@ -91,16 +93,16 @@ function restrictemaildomains_activate()
 		$db->insert_query("settings", $insert);
 		$i++;
 	}
-	
+
 	rebuild_settings();
 }
 
 function restrictemaildomains_deactivate()
 {
 	global $db;
-	
+
 	$db->delete_query("settinggroups", "name = 'restrictemaildomains'");
-	
+
 	$settings = array(
 		"restrictemaildomains_enabled",
 		"restrictemaildomains_inadmin",
@@ -108,30 +110,90 @@ function restrictemaildomains_deactivate()
 	);
 	$settings = "'" . implode("','", $settings) . "'";
 	$db->delete_query("settings", "name IN ({$settings})");
-	
+
 	rebuild_settings();
 }
 
-function restrictemaildomains_check() 
+function restrictemaildomains_member_register_end()
 {
-	global $mybb, $lang, $userhandler;
-	
+	global $validator_extra;
+
+	$validator_extra .= "
+	$('#email').rules('add', {
+		required: true,
+		email: true,
+		remote: {
+			url: 'xmlhttp.php?action=restrictemaildomains_check_email',
+			type: 'post',
+			dataType: 'json',
+			data:
+			{
+				email: function () {
+					return $('#email').val();
+				},
+				my_post_key: my_post_key
+			},
+		}
+	});
+	";
+}
+
+function restrictemaildomains_xmlhttp()
+{
+	global $mybb;
+
+	if($mybb->input['action'] == 'restrictemaildomains_check_email')
+	{
+		if(!verify_post_check($mybb->get_input('my_post_key'), true))
+		{
+			xmlhttp_error($lang->invalid_post_code);
+		}
+
+		$result = restrictemaildomains_check($mybb->input['email']);
+
+		if($result !== true)
+		{
+			echo json_encode($result);
+		}
+		else
+		{
+			echo json_encode("true");
+		}
+	}
+}
+
+function restrictemaildomains_datahandler_user_validate()
+{
+	global $mybb, $userhandler;
+
 	if($mybb->settings['restrictemaildomains_enabled'] != 1 || !((THIS_SCRIPT == "member.php" && $mybb->input['action'] == "do_register") || (THIS_SCRIPT == "usercp.php" && $mybb->input['action'] == "do_email")) || ($mybb->settings['restrictemaildomains_enabled'] == 1 && defined("IN_ADMINCP") && $mybb->settings['restrictemaildomains_inadmin'] != 1))
 	{
 		return;
 	}
-	
+
 	$userhandler->data['email'] = $mybb->input['email'];
-	
+
 	if(!$userhandler->verify_email())
 	{
 		return;
 	}
-	
+
+	$result = restrictemaildomains_check($mybb->input['email']);
+
+	if($result !== true)
+	{
+		$userhandler->set_error($result);
+	}
+}
+
+function restrictemaildomains_check($email)
+{
+	global $mybb, $lang;
+
 	$lang->load("restrictemaildomains");
-	
+
 	$is_allowed_email_domain = false;
-	
+
 	if(empty($mybb->settings['restrictemaildomains_domains']))
 	{
 		// needs to return true if no domains are specified, otherwise it won't allow any emails
@@ -142,17 +204,17 @@ function restrictemaildomains_check()
 		// we just want to check the email domain itself here
 		$allowed_email_domains = explode("\n", $mybb->settings['restrictemaildomains_domains']);
 		// need to trim blank spaces off the email domains
-		foreach($allowed_email_domains as $key => $email)
+		foreach($allowed_email_domains as $key => $domain)
 		{
-			$allowed_email_domains[$key] = trim($email);
+			$allowed_email_domains[$key] = trim($domain);
 		}
-		$exploded_email = explode("@", $mybb->input['email']);
+		$exploded_email = explode("@", $email);
 		$email_domain = $exploded_email[1];
 		if(in_array($email_domain, $allowed_email_domains))
 		{
 			$is_allowed_email_domain = true;
 		}
-		
+
 		if(!$is_allowed_email_domain)
 		{
 			foreach($allowed_email_domains as $domain)
@@ -167,19 +229,21 @@ function restrictemaildomains_check()
 			}
 		}
 	}
-	
+
 	if(!$is_allowed_email_domain)
 	{
 		$error = $lang->invalid_email_domain;
-		
+
 		$allowed_email_domains = implode(", ", $allowed_email_domains);
-		
+
 		if(!empty($allowed_email_domains))
 		{
 			$error .= $lang->sprintf($lang->valid_email_domains, $allowed_email_domains);
 		}
-		
-		$userhandler->set_error($error);
+
+		return $error;
 	}
+
+	return true;
 }
 ?>
