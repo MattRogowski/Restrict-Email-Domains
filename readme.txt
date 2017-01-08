@@ -3,8 +3,8 @@ Description: Allows you to restrict which domains users can register with.
 Website: https://github.com/MattRogowski/Restrict-Email-Domains
 Author: Matt Rogowski
 Authorsite: https://matt.rogow.ski
-Version: 1.1.0
-Compatibility: 1.6.x, 1.8.x
+Version: 1.2.0
+Compatibility: 1.8.x
 Files: 2
 Settings added: 3 (1 group)
 
@@ -24,8 +24,9 @@ Change Log:
 08/11/10 - v0.2 -> v1.0 -> Tweaked how it checks the validity of the email address. To upgrade, reupload ./inc/plugins/restrictemaildomains.php
 18/11/10 - v1.0 -> v1.0.1 -> Email address was validated before the check for if it should even be validated. To upgrade, reupload ./inc/plugins/restrictemaildomains.php
 25/08/14 - v1.0.1 -> v1.1 -> MyBB 1.8 compatible. To upgrade, reupload ./inc/plugins/restrictemaildomains.php
+08/01/17 - v1.1.0 -> v1.2.0 -> Added AJAX check for email address on registration form. Dropped compatibility with MyBB 1.6. To upgrade, reupload ./inc/plugins/restrictemaildomains.php
 
-Copyright 2016 Matthew Rogowski
+Copyright 2017 Matthew Rogowski
 
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
