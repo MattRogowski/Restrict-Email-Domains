@@ -43,7 +43,7 @@ function restrictemaildomains_info()
 
 function restrictemaildomains_activate()
 {
-	global $db;
+	global $db, $mybb;
 
 	restrictemaildomains_deactivate();
 
@@ -97,8 +97,11 @@ function restrictemaildomains_activate()
 
 	rebuild_settings();
 
-	require_once MYBB_ROOT . 'inc/adminfunctions_templates.php';
-	find_replace_templatesets('member_register', '#' . preg_quote('{$footer}') . '#', "{\$validator_extra}\n{\$footer}");
+	if ($mybb->version_code >= 1823)
+	{
+		require_once MYBB_ROOT . 'inc/adminfunctions_templates.php';
+		find_replace_templatesets('member_register', '#' . preg_quote('{$footer}') . '#', "{\$validator_extra_script}\n{\$footer}");
+	}
 }
 
 function restrictemaildomains_deactivate()
@@ -118,18 +121,72 @@ function restrictemaildomains_deactivate()
 	rebuild_settings();
 
 	require MYBB_ROOT . '/inc/adminfunctions_templates.php';
-	find_replace_templatesets('member_register', '#' . preg_quote("{\$validator_extra}\n") . '#', '');
+	find_replace_templatesets('member_register', '#' . preg_quote("{\$validator_extra_script}\n") . '#', '');
 }
 
 function restrictemaildomains_member_register_end()
 {
-	global $mybb, $validator_extra;
+	global $mybb;
 
-	$validator_extra = "";
-
-	if ($mybb->settings['restrictemaildomains_enabled'] == 1 && !empty($mybb->settings['restrictemaildomains_domains']))
+	if ($mybb->settings['restrictemaildomains_enabled'] != 1 || empty($mybb->settings['restrictemaildomains_domains']))
 	{
-		$validator_extra = "<script type=\"text/javascript\">
+		if ($mybb->version_code >= 1823)
+		{
+			global $validator_extra_script;
+			$validator_extra_script = "";
+		}
+
+		return;
+	}
+
+	if ($mybb->version_code <= 1812)
+	{
+		global $validator_extra;
+		$validator_extra .= "
+	$('#email').rules('add', {
+		required: true,
+		email: true,
+		remote: {
+			url: 'xmlhttp.php?action=restrictemaildomains_check_email',
+			type: 'post',
+			dataType: 'json',
+			data:
+			{
+				email: function () {
+					return $('#email').val();
+				},
+				my_post_key: my_post_key
+			},
+		}
+	});
+		";
+	}
+	else if ($mybb->version_code <= 1822)
+	{
+		global $validator_javascript;
+		$validator_javascript .= "
+	$('#email').rules('add', {
+		required: true,
+		email: true,
+		remote: {
+			url: 'xmlhttp.php?action=restrictemaildomains_check_email',
+			type: 'post',
+			dataType: 'json',
+			data:
+			{
+				email: function () {
+					return $('#email').val();
+				},
+				my_post_key: my_post_key
+			},
+		}
+	});
+		";
+	}
+	else
+	{
+		global $validator_extra_script;
+		$validator_extra_script = "<script type=\"text/javascript\">
 	$(function () {
 		$('#email').rules('add', {
 			required: true,
