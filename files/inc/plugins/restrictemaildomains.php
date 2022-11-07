@@ -161,7 +161,7 @@ function restrictemaildomains_member_register_end()
 	});
 		";
 	}
-	else if ($mybb->version_code <= 1822)
+	else if ($mybb->version_code >= 1813 && $mybb->version_code <= 1822)
 	{
 		global $validator_javascript;
 		$validator_javascript .= "
