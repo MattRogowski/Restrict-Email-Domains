@@ -142,69 +142,17 @@ function restrictemaildomains_member_register_end()
 	if ($mybb->version_code <= 1812)
 	{
 		global $validator_extra;
-		$validator_extra .= "
-	$('#email').rules('add', {
-		required: true,
-		email: true,
-		remote: {
-			url: 'xmlhttp.php?action=restrictemaildomains_check_email',
-			type: 'post',
-			dataType: 'json',
-			data:
-			{
-				email: function () {
-					return $('#email').val();
-				},
-				my_post_key: my_post_key
-			},
-		}
-	});
-		";
+		$validator_extra .= restrictemaildomains_get_extra_script();
 	}
 	else if ($mybb->version_code >= 1813 && $mybb->version_code <= 1822)
 	{
 		global $validator_javascript;
-		$validator_javascript .= "
-	$('#email').rules('add', {
-		required: true,
-		email: true,
-		remote: {
-			url: 'xmlhttp.php?action=restrictemaildomains_check_email',
-			type: 'post',
-			dataType: 'json',
-			data:
-			{
-				email: function () {
-					return $('#email').val();
-				},
-				my_post_key: my_post_key
-			},
-		}
-	});
-		";
+		$validator_javascript .= restrictemaildomains_get_extra_script();
 	}
 	else
 	{
 		global $validator_extra_script;
-		$validator_extra_script = "<script type=\"text/javascript\">
-	$(function () {
-		$('#email').rules('add', {
-			required: true,
-			email: true,
-			remote: {
-				url: 'xmlhttp.php?action=restrictemaildomains_check_email',
-				type: 'post',
-				dataType: 'json',
-				data: {
-					email: function () {
-						return $('#email').val();
-					},
-					my_post_key: my_post_key
-				},
-			}
-		});
-	});
-</script>";
+		$validator_extra_script = restrictemaildomains_get_extra_script(true);
 	}
 }
 
@@ -315,4 +263,42 @@ function restrictemaildomains_check($email)
 	}
 
 	return true;
+}
+
+function restrictemaildomains_get_extra_script($script_tag = false)
+{
+	$script = "";
+
+	if($script_tag)
+	{
+		$script .= "<script type=\"text/javascript\">
+	$(function () {
+		";
+	}
+
+	$script .= "$('#email').rules('add', {
+			required: true,
+			email: true,
+			remote: {
+				url: 'xmlhttp.php?action=restrictemaildomains_check_email',
+				type: 'post',
+				dataType: 'json',
+				data:
+				{
+					email: function () {
+						return $('#email').val();
+					},
+					my_post_key: my_post_key
+				},
+			}
+		});
+	";
+
+	if($script_tag)
+	{
+		$script .= "});
+</script>";
+	}
+
+	return $script;
 }
